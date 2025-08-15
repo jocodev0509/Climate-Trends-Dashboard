@@ -1,6 +1,7 @@
 import { Routes, Route } from 'react-router-dom';
 import LoginPage from './pages/index';
 import RegisterPage from './pages/register';
+import DashboardPage from './pages/dashboard';
 import { useEffect } from 'react';
 
 import { Navigate } from "react-router-dom";
@@ -31,6 +32,7 @@ function App() {
     <Routes>
       <Route path="/" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
+      <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
     </Routes>
   );
 }
