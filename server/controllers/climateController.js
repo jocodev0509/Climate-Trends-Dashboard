@@ -1,11 +1,25 @@
 // server/controllers/climateController.js
 
-const { climate_data } = require('../models');
+const { climate_data, regions } = require('../models');
 
 exports.getAllClimateData = async (req, res) => {
   try {
-    const data = await climate_data.findAll();
-    res.json(data);
+    const results = await climate_data.findAll({
+      attributes: ['id', 'year', 'avg_temp', 'co2_level', 'precipitation', 'createdAt', 'updatedAt'],
+      include: [{
+        model: regions,
+        as: 'region',
+        attributes: ['name'],  // Only fetch region name
+      }]
+    });
+    const formatted = results.map(item => {
+      const plain = item.get({ plain: true });
+      return {
+        ...plain,
+        region: plain.region.name,  // Flatten region object
+      };
+    });
+    res.json(formatted);
   } catch (err) {
     res.status(500).json({ message: 'Failed to fetch climate data', error: err.message });
   }
