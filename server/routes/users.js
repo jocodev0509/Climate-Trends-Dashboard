@@ -12,4 +12,7 @@ router.get('/', authenticate, authorizeAdmin, userController.getAllUsers);
 // PUT /api/users/:id/role
 router.put('/:id/role', authenticate, authorizeAdmin, userController.updateUserRole);
 
+// PUT /api/users/:id/deactive
+router.put('/:id/deactive', authenticate, authorizeAdmin, userController.deactiveUser);
+
 module.exports = router;
