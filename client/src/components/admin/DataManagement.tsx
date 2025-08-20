@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState, useEffect } from 'react';
 import { Plus, Edit2, Trash2, RefreshCw, Save, X } from 'lucide-react';
-import { climateApi, regionsApi } from '../../services/api';
 import type { ClimateData, Region } from '../../types';
 import { useAuthStore } from "@/features/auth/store";
 import axios from 'axios';
@@ -16,7 +15,7 @@ export const DataManagement: React.FC = () => {
   const [showAddForm, setShowAddForm] = useState(false);
   const [formData, setFormData] = useState({
     year: new Date().getFullYear(),
-    region: '',
+    region_id: 0,
     avg_temp: 0,
     co2_level: 0,
     precipitation: 0,
@@ -33,7 +32,7 @@ export const DataManagement: React.FC = () => {
       const response = await axios.get("/api/climate", {
         headers: { Authorization: `Bearer ${token}` },
       });
-      setClimateData(response.data.slice(0, 50)); // Limit for demo
+      setClimateData(response.data); // Limit for demo
       setError('');
     } catch (err: any) {
       setError('Failed to load climate data');
@@ -45,8 +44,12 @@ export const DataManagement: React.FC = () => {
 
   const loadRegions = async () => {
     try {
-      const response = await regionsApi.getRegions();
-      setRegions(response.data);
+      const response = await axios.get("/api/regions", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      await setRegions(response.data);
+      console.log(response.data);
+      
     } catch (err) {
       console.error('Failed to load regions:', err);
     }
@@ -54,7 +57,9 @@ export const DataManagement: React.FC = () => {
 
   const handleAdd = async () => {
     try {
-      const response = await climateApi.addClimateData(formData);
+      const response = await axios.post("/api/climate", formData, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
       setClimateData([response.data, ...climateData]);
       setShowAddForm(false);
       resetForm();
@@ -66,8 +71,10 @@ export const DataManagement: React.FC = () => {
 
   const handleUpdate = async (id: string) => {
     try {
-      const response = await climateApi.updateClimateData(id, formData);
-      setClimateData(climateData.map(item => 
+      const response = await axios.put(`/api/climate/${id}`, formData, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setClimateData(climateData.map(item =>
         item.id === id ? response.data : item
       ));
       setEditingId(null);
@@ -82,7 +89,9 @@ export const DataManagement: React.FC = () => {
     if (!confirm('Are you sure you want to delete this data entry?')) return;
 
     try {
-      await climateApi.deleteClimateData(id);
+      await axios.delete(`/api/climate/${id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
       setClimateData(climateData.filter(item => item.id !== id));
     } catch (err: any) {
       alert('Failed to delete climate data');
@@ -94,7 +103,7 @@ export const DataManagement: React.FC = () => {
     setEditingId(item.id);
     setFormData({
       year: item.year,
-      region: item.region,
+      region_id: Number(regions.find(r => r.name === item.region)?.id) || 0,
       avg_temp: item.avg_temp,
       co2_level: item.co2_level,
       precipitation: item.precipitation,
@@ -110,7 +119,7 @@ export const DataManagement: React.FC = () => {
   const resetForm = () => {
     setFormData({
       year: new Date().getFullYear(),
-      region: '',
+      region_id: 0,
       avg_temp: 0,
       co2_level: 0,
       precipitation: 0,
@@ -173,20 +182,24 @@ export const DataManagement: React.FC = () => {
                 min="2000"
                 max="2030"
                 value={formData.year}
-                onChange={(e) => setFormData({...formData, year: parseInt(e.target.value)})}
+                onChange={(e) => setFormData({ ...formData, year: parseInt(e.target.value) })}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Region</label>
               <select
-                value={formData.region}
-                onChange={(e) => setFormData({...formData, region: e.target.value})}
+                value={formData.region_id}
+                onChange={(e) =>
+                  setFormData({ ...formData, region_id: Number(e.target.value) })
+                }
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
-                <option value="">Select Region</option>
-                {regions.map(region => (
-                  <option key={region.id} value={region.name}>{region.name}</option>
+                <option value={0}>Select Region</option>
+                {regions.map((region) => (
+                  <option key={region.id} value={region.id}>
+                    {region.name} {/* Display value to user */}
+                  </option>
                 ))}
               </select>
             </div>
@@ -196,7 +209,7 @@ export const DataManagement: React.FC = () => {
                 type="number"
                 step="0.1"
                 value={formData.avg_temp}
-                onChange={(e) => setFormData({...formData, avg_temp: parseFloat(e.target.value)})}
+                onChange={(e) => setFormData({ ...formData, avg_temp: parseFloat(e.target.value) })}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
@@ -206,7 +219,7 @@ export const DataManagement: React.FC = () => {
                 type="number"
                 step="0.1"
                 value={formData.co2_level}
-                onChange={(e) => setFormData({...formData, co2_level: parseFloat(e.target.value)})}
+                onChange={(e) => setFormData({ ...formData, co2_level: parseFloat(e.target.value) })}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
@@ -215,7 +228,7 @@ export const DataManagement: React.FC = () => {
               <input
                 type="number"
                 value={formData.precipitation}
-                onChange={(e) => setFormData({...formData, precipitation: parseInt(e.target.value)})}
+                onChange={(e) => setFormData({ ...formData, precipitation: parseInt(e.target.value) })}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
@@ -271,18 +284,23 @@ export const DataManagement: React.FC = () => {
                       <input
                         type="number"
                         value={formData.year}
-                        onChange={(e) => setFormData({...formData, year: parseInt(e.target.value)})}
+                        onChange={(e) => setFormData({ ...formData, year: parseInt(e.target.value) })}
                         className="w-20 px-2 py-1 border border-gray-300 rounded text-sm"
                       />
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <select
-                        value={formData.region}
-                        onChange={(e) => setFormData({...formData, region: e.target.value})}
-                        className="w-32 px-2 py-1 border border-gray-300 rounded text-sm"
+                        value={formData.region_id}
+                        onChange={(e) =>
+                          setFormData({ ...formData, region_id: Number(e.target.value) })
+                        }
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                       >
-                        {regions.map(region => (
-                          <option key={region.id} value={region.name}>{region.name}</option>
+                        <option value={formData.region_id}>Select Region</option>
+                        {regions.map((region) => (
+                          <option key={region.id} value={region.id}>
+                            {region.name} {/* Display value to user */}
+                          </option>
                         ))}
                       </select>
                     </td>
@@ -291,7 +309,7 @@ export const DataManagement: React.FC = () => {
                         type="number"
                         step="0.1"
                         value={formData.avg_temp}
-                        onChange={(e) => setFormData({...formData, avg_temp: parseFloat(e.target.value)})}
+                        onChange={(e) => setFormData({ ...formData, avg_temp: parseFloat(e.target.value) })}
                         className="w-20 px-2 py-1 border border-gray-300 rounded text-sm"
                       />
                     </td>
@@ -300,7 +318,7 @@ export const DataManagement: React.FC = () => {
                         type="number"
                         step="0.1"
                         value={formData.co2_level}
-                        onChange={(e) => setFormData({...formData, co2_level: parseFloat(e.target.value)})}
+                        onChange={(e) => setFormData({ ...formData, co2_level: parseFloat(e.target.value) })}
                         className="w-20 px-2 py-1 border border-gray-300 rounded text-sm"
                       />
                     </td>
@@ -308,7 +326,7 @@ export const DataManagement: React.FC = () => {
                       <input
                         type="number"
                         value={formData.precipitation}
-                        onChange={(e) => setFormData({...formData, precipitation: parseInt(e.target.value)})}
+                        onChange={(e) => setFormData({ ...formData, precipitation: parseInt(e.target.value) })}
                         className="w-20 px-2 py-1 border border-gray-300 rounded text-sm"
                       />
                     </td>

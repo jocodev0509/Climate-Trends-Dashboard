@@ -2,9 +2,9 @@ import { Routes, Route } from 'react-router-dom';
 import LoginPage from './pages/index';
 import RegisterPage from './pages/register';
 import DashboardPage from './pages/dashboard';
+import { useEffect } from 'react';
 import { Header } from './components/layout/Header';
 import { AdminPanel } from './components/admin/AdminPanel';
-import { useEffect } from 'react';
 import { Loader2 } from "lucide-react";
 
 import { Navigate } from "react-router-dom";
