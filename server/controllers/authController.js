@@ -6,7 +6,7 @@ require('dotenv').config();
 const JWT_SECRET = process.env.JWT_SECRET || 'your_jwt_secret';
 
 // Register new user
-exports.register = async (req, res) => {
+exports.registerUser = async (req, res) => {
   try {
     const { username, email, password, role } = req.body;
 
@@ -25,7 +25,7 @@ exports.register = async (req, res) => {
     const password_hash = await bcrypt.hash(password, 10);
 
     // Create user, role defaults to 'user' if not provided or invalid
-    const newUser = await users.create({
+    await users.create({
       username,
       email,
       password_hash,
@@ -41,7 +41,7 @@ exports.register = async (req, res) => {
 };
 
 // Login user
-exports.login = async (req, res) => {
+exports.loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
 
