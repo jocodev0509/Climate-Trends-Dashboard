@@ -3,8 +3,10 @@ const { regions } = require('../models');
 // Get all regions
 exports.getAllRegions = async (req, res) => {
   try {
-    const regions = await Region.findAll();
-    res.status(200).json(regions);
+    const regionlist = await regions.findAll();
+    console.log(regionlist);
+    
+    res.status(200).json(regionlist);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -13,7 +15,7 @@ exports.getAllRegions = async (req, res) => {
 // Get region by ID
 exports.getRegionById = async (req, res) => {
   try {
-    const region = await Region.findByPk(req.params.id);
+    const region = await regions.findByPk(req.params.id);
     if (!region) return res.status(404).json({ message: 'Region not found' });
     res.status(200).json(region);
   } catch (err) {
@@ -36,7 +38,7 @@ exports.createRegion = async (req, res) => {
 // Update region
 exports.updateRegion = async (req, res) => {
   try {
-    const region = await Region.findByPk(req.params.id);
+    const region = await regions.findByPk(req.params.id);
     if (!region) return res.status(404).json({ message: 'Region not found' });
 
     region.name = req.body.name || region.name;
@@ -50,7 +52,7 @@ exports.updateRegion = async (req, res) => {
 // Delete region
 exports.deleteRegion = async (req, res) => {
   try {
-    const region = await Region.findByPk(req.params.id);
+    const region = await regions.findByPk(req.params.id);
     if (!region) return res.status(404).json({ message: 'Region not found' });
 
     await region.destroy();

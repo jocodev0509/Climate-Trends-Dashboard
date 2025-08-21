@@ -3,14 +3,14 @@ export interface User {
   username: string;
   email: string;
   role: 'user' | 'admin';
-  isActive: boolean;
+  is_active: boolean;
   createdAt: string;
 }
 
 export interface ClimateData {
   id: string;
   year: number;
-  region: string;
+  region: string
   avg_temp: number;
   co2_level: number;
   precipitation: number;
@@ -21,6 +21,8 @@ export interface ClimateData {
 export interface Region {
   id: string;
   name: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface AuthState {

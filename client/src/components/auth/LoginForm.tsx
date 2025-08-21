@@ -5,6 +5,7 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate, Link } from "react-router-dom";
 import { AxiosError } from "axios";
+import { useState } from "react";
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -33,6 +34,7 @@ export default function LoginForm() {
     });
 
     const navigate = useNavigate();
+    const [serverError, setServerError] = useState<string | null>(null);
 
     const onSubmit = async (data: LoginFormData) => {
         try {
@@ -46,6 +48,8 @@ export default function LoginForm() {
                 error.response?.data?.message ||
                 error.message ||
                 "Something went wrong during login";
+
+            setServerError(message);
             console.error("Login error:", message);
         }
     };
@@ -110,6 +114,10 @@ export default function LoginForm() {
                                 <p className="mt-1 text-sm text-red-500">{errors.password.message}</p>
                             )}
                         </div>
+
+                        {serverError && (
+                            <p className="text-sm text-red-600 text-center">{serverError}</p>
+                        )}
 
                         <Button
                             type="submit"
