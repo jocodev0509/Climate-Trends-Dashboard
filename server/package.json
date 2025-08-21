@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "mocha --timeout 10000 --recursive",
+    "test:coverage": "nyc mocha --timeout 10000 --recursive",
     "dev": "nodemon index.js"
   },
   "keywords": [],
@@ -22,6 +23,11 @@
     "sequelize": "^6.37.7"
   },
   "devDependencies": {
-    "nodemon": "^3.1.10"
+    "chai": "^5.3.1",
+    "mocha": "^11.7.1",
+    "nodemon": "^3.1.10",
+    "nyc": "^17.1.0",
+    "sinon": "^21.0.0",
+    "supertest": "^7.1.4"
   }
 }
