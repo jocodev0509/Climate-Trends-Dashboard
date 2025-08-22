@@ -10,10 +10,16 @@ const config = require(__dirname + '/../config/config')[env];
 const db = {};
 
 let sequelize;
+
+const options = {
+  ...config,
+  logging: process.env.NODE_ENV === 'test' ? false : console.log, // disable SQL logs during tests
+};
+
 if (config.use_env_variable) {
-  sequelize = new Sequelize(process.env[config.use_env_variable], config);
+  sequelize = new Sequelize(process.env[config.use_env_variable], options);
 } else {
-  sequelize = new Sequelize(config.database, config.username, config.password, config);
+  sequelize = new Sequelize(config.database, config.username, config.password, options);
 }
 
 // Import all models

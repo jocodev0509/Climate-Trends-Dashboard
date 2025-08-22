@@ -3,8 +3,11 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "test": "mocha --timeout 10000 --recursive",
-    "test:coverage": "nyc mocha --timeout 10000 --recursive",
+    "test:unit": "mocha --timeout 10000 --recursive test/unit",
+    "test:coverage:unit": "nyc mocha --timeout 10000 --recursive test/unit",
+    "test:integration": "cross-env NODE_ENV=test DOTENV_CONFIG_QUIET=true jest --runInBand test/integration",
+    "test:coverage:integration": "cross-env NODE_ENV=test DOTENV_CONFIG_QUIET=true nyc jest --runInBand test/integration",
+    "test": "npm run test:unit && npm run test:integration",
     "dev": "nodemon index.js"
   },
   "keywords": [],
@@ -24,6 +27,7 @@
   },
   "devDependencies": {
     "chai": "^5.3.1",
+    "jest": "^30.0.5",
     "mocha": "^11.7.1",
     "nodemon": "^3.1.10",
     "nyc": "^17.1.0",

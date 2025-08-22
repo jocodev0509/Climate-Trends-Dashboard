@@ -45,7 +45,10 @@ db.sequelize.authenticate()
     console.error('Unable to connect to the database:', err);
   });
 
-// Start server
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+// Only listen if run directly
+if (require.main === module) {
+  const PORT = process.env.PORT || 5000;
+  app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+}
+
+module.exports = app; // export Express instance for testing
