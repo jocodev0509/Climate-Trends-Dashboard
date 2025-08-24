@@ -88,7 +88,7 @@ export default function LoginForm() {
                     </div>
 
                     {/* Email/Password Form */}
-                    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+                    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
                         <div>
                             <Label htmlFor="email">Email</Label>
                             <Input

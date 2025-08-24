@@ -19,5 +19,10 @@ export default defineConfig({
         secure: false,
       }
     }
-  }
+  },
+  test: {
+    globals: true, // Makes Vitest globals available without explicit imports
+    environment: 'jsdom', // Specifies the test environment
+    setupFiles: ['./src/setupTests.ts'], // Optional: for global test setup like Jest DOM matchers
+  },
 })

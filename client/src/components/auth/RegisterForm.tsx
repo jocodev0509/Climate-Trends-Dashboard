@@ -3,9 +3,10 @@
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { FcGoogle, } from "react-icons/fc";
+import { FcGoogle } from "react-icons/fc";
 import { FaGithub } from "react-icons/fa";
 import { useNavigate, Link } from "react-router-dom";
+import { useState } from "react";
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -16,9 +17,9 @@ import api from "@/lib/axios";
 
 const registerSchema = z
   .object({
-    username: z.string(),
+    username: z.string().min(1, "Username is required"),
     email: z.string().email("Invalid email address"),
-    password: z.string().min(8, "Password must be at least 8 characters"),
+    password: z.string().min(8, "Password must be at least 8 characters long"),
     confirmPassword: z.string(),
   })
   .refine((data) => data.password === data.confirmPassword, {
@@ -38,17 +39,21 @@ export default function RegisterForm() {
   });
 
   const navigate = useNavigate();
+  const [serverError, setServerError] = useState<string | null>(null);
 
   const onSubmit = async (data: RegisterFormData) => {
+    setServerError(null); // reset previous server error
     try {
       await api.post("/auth/register", {
         username: data.username,
         email: data.email,
         password: data.password,
       });
-      navigate("/"); // redirect to login
-    } catch (error) {
-      console.error("Registration error:", error);
+      navigate("/"); // redirect to login after successful registration
+    } catch (err: any) {
+      const message = err.response?.data?.message || "Server error";
+      setServerError(message);
+      console.error("Registration error:", message);
     }
   };
 
@@ -65,12 +70,10 @@ export default function RegisterForm() {
           {/* Social login buttons */}
           <div className="grid grid-cols-2 gap-6">
             <Button variant="outline" className="w-full">
-              <FcGoogle className="mr-2 h-4 w-4" />
-              Google
+              <FcGoogle className="mr-2 h-4 w-4" /> Google
             </Button>
             <Button variant="outline" className="w-full">
-              <FaGithub className="mr-2 h-4 w-4" />
-              GitHub
+              <FaGithub className="mr-2 h-4 w-4" /> GitHub
             </Button>
           </div>
 
@@ -85,22 +88,25 @@ export default function RegisterForm() {
           </div>
 
           {/* Form */}
-          <form onSubmit={handleSubmit(onSubmit)} className="grid gap-4">
+          <form onSubmit={handleSubmit(onSubmit)} className="grid gap-4" noValidate>
             <div className="grid gap-2">
-              <Label htmlFor="username">Name</Label>
-              <Input id="username" type="username" {...register("username")} />
+              <Label htmlFor="username">Username</Label>
+              <Input id="username" type="text" {...register("username")} />
               {errors.username && <p className="text-sm text-red-500">{errors.username.message}</p>}
             </div>
+
             <div className="grid gap-2">
               <Label htmlFor="email">Email</Label>
               <Input id="email" type="email" {...register("email")} />
               {errors.email && <p className="text-sm text-red-500">{errors.email.message}</p>}
             </div>
+
             <div className="grid gap-2">
               <Label htmlFor="password">Password</Label>
               <Input id="password" type="password" {...register("password")} />
               {errors.password && <p className="text-sm text-red-500">{errors.password.message}</p>}
             </div>
+
             <div className="grid gap-2">
               <Label htmlFor="confirmPassword">Confirm Password</Label>
               <Input id="confirmPassword" type="password" {...register("confirmPassword")} />
@@ -108,6 +114,12 @@ export default function RegisterForm() {
                 <p className="text-sm text-red-500">{errors.confirmPassword.message}</p>
               )}
             </div>
+
+            {/* Server error */}
+            {serverError && (
+              <p className="text-sm text-red-600 text-center">{serverError}</p>
+            )}
+
             <Button type="submit" className="w-full" disabled={isSubmitting}>
               {isSubmitting ? "Registering..." : "Register"}
             </Button>
